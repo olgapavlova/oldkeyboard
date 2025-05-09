@@ -21,4 +21,4 @@ flash:
 	avrdude -v -p atmega32u4 -c avr109 -P /dev/ttyACM0 -b 57600 -D -U flash:w:$(TARGET).hex
 
 clean:
-	rm -f *.elf *.hex
+	@rm -f $(TARGET).elf $(TARGET).hex
