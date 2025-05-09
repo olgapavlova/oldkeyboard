@@ -18,14 +18,16 @@ void blink(void) {
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * */  
 
+// Инициируем АЦП
 void adc_init() {
     ADMUX = (1 << REFS0);  // опорное напряжение («попугаи»)
     ADCSRA = (1 << ADEN) |  // работай
              (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);  // помедленней 
 }
 
-uint16_t adc_read(uint8_t channel) {
-    ADMUX = (ADMUX & 0xF0) | (channel & 0x0F); // канал
+// Читаем значение на пине
+uint16_t adc_read(uint8_t pin) {
+    ADMUX = (ADMUX & 0xF0) | (pin & 0x0F);     // пин 
     ADCSRA |= (1 << ADSC);                     // начать преобразование
     while (ADCSRA & (1 << ADSC));              // ждать окончания
     return ADC;
@@ -73,15 +75,16 @@ void uart_test (void) {
 // Точка входа, как обычно
 int main(void) {
   // blink();
+  // uart_test();
 
   adc_init();
   uart_init();
 
   while (1) {
       char buffer[32];
-      for (uint8_t channel = 7; channel >= 4; channel--) {
-          uint16_t value = adc_read(channel);
-          snprintf(buffer, sizeof(buffer), "A%d: %4d\t", (7 - channel), value);
+      for (uint8_t pin = 7; pin >= 4; pin--) {
+          uint16_t value = adc_read(pin);
+          snprintf(buffer, sizeof(buffer), "A%d: %4d\t", (7 - pin), value);
           uart_send_string(buffer);
       }
       uart_send_string("\r\n");
