@@ -74,9 +74,10 @@ void uart_test (void) {
 
 // Точка входа, как обычно
 int main(void) {
-  // blink();
+  blink();
   // uart_test();
 
+  /*
   adc_init();
   uart_init();
 
@@ -90,5 +91,6 @@ int main(void) {
       uart_send_string("\r\n");
       _delay_ms(500);
   }
+  */
   return 0;
 }
