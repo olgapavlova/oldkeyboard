@@ -20,9 +20,9 @@ void blink(void) {
 
 // Инициируем АЦП
 void adc_init() {
-    ADMUX = (1 << REFS0);  // опорное напряжение («попугаи»)
+    ADMUX = (1 << REFS0) ;  // опорное напряжение («попугаи»)
     ADCSRA = (1 << ADEN) |  // работай
-             (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);  // помедленней 
+              (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);  // помедленней 
 }
 
 // Читаем значение на пине
@@ -71,26 +71,39 @@ void uart_test (void) {
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * */  
 
+// Отправить по UART отчёт о состоянии одного пина
+void kb_pin_report(uint8_t pin) {
+    char buffer[32];
+    uint16_t value = adc_read(pin);
+    snprintf(buffer, sizeof(buffer), "A%d: %4d\t", (7 - pin), value);
+    uart_send_string(buffer);
+}
+
+// Отправить по UART отчёт о состоянии клавиатуры
+void kb_report(void) {
+    for (uint8_t pin = 7; pin >= 4; pin--) {
+      kb_pin_report(pin);
+    }
+    uart_send_string("\r\n");
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * */  
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * */  
 
 // Точка входа, как обычно
 int main(void) {
-  blink();
+  // blink();
   // uart_test();
 
-  /*
-  adc_init();
   uart_init();
+  adc_init();
 
   while (1) {
-      char buffer[32];
-      for (uint8_t pin = 7; pin >= 4; pin--) {
-          uint16_t value = adc_read(pin);
-          snprintf(buffer, sizeof(buffer), "A%d: %4d\t", (7 - pin), value);
-          uart_send_string(buffer);
-      }
-      uart_send_string("\r\n");
-      _delay_ms(500);
+    kb_report();
+    _delay_ms(500);
   }
-  */
+
   return 0;
 }

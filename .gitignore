@@ -2,3 +2,7 @@
 *.tmp
 *.hex
 *.elf
+src/LittleWire
+src/micronucleus
+src/usbdrv
+src/v-usb
