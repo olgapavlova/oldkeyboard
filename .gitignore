@@ -6,4 +6,4 @@ src/LittleWire
 src/micronucleus
 src/usbdrv
 src/v-usb
-lib/*
+*/Documentation/*
