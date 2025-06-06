@@ -2,8 +2,14 @@
 *.tmp
 *.hex
 *.elf
+*.bin
+*.eep
+*.lss
+*.map
+*.sym
 src/LittleWire
 src/micronucleus
 src/usbdrv
 src/v-usb
 */Documentation/*
+*/obj/*
