@@ -3,22 +3,26 @@ F_CPU = 16000000UL
 CC = avr-gcc
 BAUD = 9600
 OBJCOPY = avr-objcopy
-CFLAGS = -Wall -Os -DF_CPU=$(F_CPU) -mmcu=$(MCU)
+CFLAGS = -std=gnu99 -Wall -Os -DF_CPU=$(F_CPU) -mmcu=$(MCU)
+LDFLAGS = -mmcu=$(MCU) -Wl,--no-gc-sections
 
-TARGET = src/micro/main
+TARGET = src/proto/main
 
-all: $(TARGET).hex
+all: clean $(TARGET).hex flash
 
 %.elf: %.c
-	$(CC) $(CFLAGS) -o $@ $<
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
 %.hex: %.elf
 	$(OBJCOPY) -O ihex -R .eeprom $< $@
 
-flash:
+flash: $(TARGET).hex
 	stty -F /dev/ttyACM0 1200
 	sleep 2
-	avrdude -v -p atmega32u4 -c avr109 -P /dev/ttyACM0 -b 57600 -D -U flash:w:$(TARGET).hex
+	avrdude -v -p $(MCU) -c avr109 -P /dev/ttyACM0 -b 57600 -U flash:w:$<
+
+monitor:
+	minicom -D /dev/ttyUSB0 -b 9600
 
 clean:
-	@rm -f $(TARGET).elf $(TARGET).hex
+	@rm -f $(TARGET) $(TARGET).o $(TARGET).elf $(TARGET).hex
