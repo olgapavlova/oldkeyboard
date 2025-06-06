@@ -35,6 +35,9 @@
  */
 
 #include "Keyboard.h"
+#include "adc.h"
+#include "uart.h"
+#include "kb.h"
 
 /** Buffer to hold the previously generated Keyboard HID report, for comparison purposes inside the HID class driver. */
 static uint8_t PrevKeyboardHIDReportBuffer[sizeof(USB_KeyboardReport_Data_t)];
@@ -65,6 +68,8 @@ USB_ClassInfo_HID_Device_t Keyboard_HID_Interface =
  */
 int main(void)
 {
+  uart_init();
+  adc_init();
 	SetupHardware();
 
 	LEDs_SetAllLEDs(LEDMASK_USB_NOTREADY);
@@ -160,41 +165,33 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
 {
 	USB_KeyboardReport_Data_t* KeyboardReport = (USB_KeyboardReport_Data_t*)ReportData;
 
-	uint8_t JoyStatus_LCL    = Joystick_GetStatus();
-	uint8_t ButtonStatus_LCL = Buttons_GetStatus();
+  static uint8_t kb_state = KB_PRESSED;
+  static uint32_t timer = 0;
 
-	uint8_t UsedKeyCodes = 0;
+  if(++timer > 500) {
+    int kb_key_pressed_value = kb_key_pressed();
 
-  //
-  static uint8_t key_pressed = 0;
-
-  if(key_pressed) {
-    KeyboardReport->KeyCode[UsedKeyCodes++] = 0;
-    key_pressed = 0;
-  } else {
-    KeyboardReport->KeyCode[UsedKeyCodes++] = HID_KEYBOARD_SC_A;
-    key_pressed = 1;
+    switch (kb_state) {
+      case KB_WAIT: {
+                      timer = 0;
+                      kb_state = KB_PRESSED;
+                      break;
+                    }
+      case KB_PRESSED: {
+                         if(kb_key_pressed_value != 0) {
+                          KeyboardReport->KeyCode[0] = kb_key_pressed_value;
+                          kb_report();
+                         }
+                         kb_state = KB_RELEASED;
+                         break;
+                       }
+      case KB_RELEASED: {
+                          KeyboardReport->KeyCode[0] = 0;
+                          kb_state = KB_WAIT;
+                          break;
+                        }
+    }
   }
-  //
-
-	if (JoyStatus_LCL & JOY_UP)
-	  KeyboardReport->KeyCode[UsedKeyCodes++] = HID_KEYBOARD_SC_A;
-	else if (JoyStatus_LCL & JOY_DOWN)
-	  KeyboardReport->KeyCode[UsedKeyCodes++] = HID_KEYBOARD_SC_B;
-
-	if (JoyStatus_LCL & JOY_LEFT)
-	  KeyboardReport->KeyCode[UsedKeyCodes++] = HID_KEYBOARD_SC_C;
-	else if (JoyStatus_LCL & JOY_RIGHT)
-	  KeyboardReport->KeyCode[UsedKeyCodes++] = HID_KEYBOARD_SC_D;
-
-	if (JoyStatus_LCL & JOY_PRESS)
-	  KeyboardReport->KeyCode[UsedKeyCodes++] = HID_KEYBOARD_SC_E;
-
-	if (ButtonStatus_LCL & BUTTONS_BUTTON1)
-	  KeyboardReport->KeyCode[UsedKeyCodes++] = HID_KEYBOARD_SC_F;
-
-	if (UsedKeyCodes)
-	  KeyboardReport->Modifier = HID_KEYBOARD_MODIFIER_LEFTSHIFT;
 
 	*ReportSize = sizeof(USB_KeyboardReport_Data_t);
 	return false;

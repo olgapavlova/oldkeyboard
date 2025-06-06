@@ -18,9 +18,9 @@ F_CPU        = 16000000
 F_USB        = $(F_CPU)
 OPTIMIZATION = s
 TARGET       = Keyboard
-SRC          = $(TARGET).c Descriptors.c $(LUFA_SRC_USB) $(LUFA_SRC_USBCLASS)
+SRC          = $(TARGET).c Descriptors.c $(LUFA_SRC_USB) $(LUFA_SRC_USBCLASS) adc.c uart.c kb.c
 LUFA_PATH    = /home/op/tools/lufa/LUFA
-CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/
+CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/ -I.
 LD_FLAGS     =
 
 # Default target
@@ -32,6 +32,9 @@ flash: $(TARGET).hex
 	stty -F $(DEVICE) 1200
 	sleep 2
 	$(DRIVER) -v -p $(MCU) -c avr109 -P $(DEVICE) -b 57600 -U flash:w:$<
+
+monitor:
+	minicom -D /dev/ttyUSB0 -b 9600
 
 # Include LUFA-specific DMBS extension modules
 DMBS_LUFA_PATH ?= $(LUFA_PATH)/Build/LUFA
