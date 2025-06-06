@@ -6,7 +6,7 @@ OBJCOPY = avr-objcopy
 CFLAGS = -std=gnu99 -Wall -Os -DF_CPU=$(F_CPU) -mmcu=$(MCU)
 LDFLAGS = -mmcu=$(MCU) -Wl,--no-gc-sections
 
-TARGET = src/proto/main
+TARGET = proto/uex
 
 all: clean $(TARGET).hex flash
 
