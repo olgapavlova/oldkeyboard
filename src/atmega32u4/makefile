@@ -1,40 +1,43 @@
-#
-#             LUFA Library
-#     Copyright (C) Dean Camera, 2017.
-#
-#  dean [at] fourwalledcubicle [dot] com
-#           www.lufa-lib.org
-#
-# --------------------------------------
-#         LUFA Project Makefile.
-# --------------------------------------
+# Кросс-компиляция кода для микроконтроллера ATmega32u4
+# Использует билдер фреймворка LUFA
 
-# Run "make help" for target help.
-
+# Настройки железа
 MCU          = atmega32u4
 ARCH         = AVR8
 BOARD        = USBKEY
 F_CPU        = 16000000
 F_USB        = $(F_CPU)
 OPTIMIZATION = s
-TARGET       = Keyboard
-SRC          = $(TARGET).c Descriptors.c $(LUFA_SRC_USB) $(LUFA_SRC_USBCLASS) adc.c uart.c kb.c
+DEVICE 		 = /dev/ttyACM0
+DRIVER 		 = avrdude
+
+# Настройки компиляции
+TARGET       = main
+SRC          = $(TARGET).c Keyboard.c Descriptors.c $(LUFA_SRC_USB) $(LUFA_SRC_USBCLASS) adc.c uart.c kb.c
 LUFA_PATH    = /home/op/tools/lufa/LUFA
 CC_FLAGS     = -DUSE_LUFA_CONFIG_HEADER -IConfig/ -I.
 LD_FLAGS     =
 
-# Default target
+# Цель по умолчанию
 all:
 
-DEVICE = /dev/ttyACM0
-DRIVER = avrdude
+# Загрузить прошивку в микроконтроллер
 flash: $(TARGET).hex
 	stty -F $(DEVICE) 1200
 	sleep 2
 	$(DRIVER) -v -p $(MCU) -c avr109 -P $(DEVICE) -b 57600 -U flash:w:$<
 
-monitor:
+# Мониторить UART-выход микроконтроллера (обычно логи)
+uart:
 	minicom -D /dev/ttyUSB0 -b 9600
+
+# Мониторить входящие сигналы клавиатуры
+input:
+	sudo evtest
+
+
+
+# Специфические цели билдера фреймворка LUFA
 
 # Include LUFA-specific DMBS extension modules
 DMBS_LUFA_PATH ?= $(LUFA_PATH)/Build/LUFA

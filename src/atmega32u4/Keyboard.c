@@ -62,26 +62,6 @@ USB_ClassInfo_HID_Device_t Keyboard_HID_Interface =
 			},
 	};
 
-
-/** Main program entry point. This routine contains the overall program flow, including initial
- *  setup of all components and the main program loop.
- */
-int main(void)
-{
-  uart_init();
-  adc_init();
-	SetupHardware();
-
-	LEDs_SetAllLEDs(LEDMASK_USB_NOTREADY);
-	GlobalInterruptEnable();
-
-	for (;;)
-	{
-		HID_Device_USBTask(&Keyboard_HID_Interface);
-		USB_USBTask();
-	}
-}
-
 /** Configures the board hardware and chip peripherals for the demo's functionality. */
 void SetupHardware()
 {

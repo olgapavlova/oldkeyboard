@@ -24,5 +24,10 @@ flash: $(TARGET).hex
 monitor:
 	minicom -D /dev/ttyUSB0 -b 9600
 
+
+
+
+# Удалить все следы прошлых компиляций
+clear: clean
 clean:
 	@rm -f $(TARGET) $(TARGET).o $(TARGET).elf $(TARGET).hex
