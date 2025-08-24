@@ -149,7 +149,6 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
   static uint32_t timer = 0;
 
   if(++timer > 500) {
-    int kb_key_pressed_value = kb_key_pressed();
 
     switch (kb_state) {
       case KB_WAIT: {
@@ -158,9 +157,12 @@ bool CALLBACK_HID_Device_CreateHIDReport(USB_ClassInfo_HID_Device_t* const HIDIn
                       break;
                     }
       case KB_PRESSED: {
-                         if(kb_key_pressed_value != 0) {
-                          KeyboardReport->KeyCode[0] = kb_key_pressed_value;
-                          kb_report();
+                         int kb_key_pressed_value = kb_key_pressed();
+                         if(kb_key_pressed_value > 0) {
+                            char kb_desc[100] = {'\0'};
+                            snprintf(kb_desc, sizeof(kb_desc), "Char code: %d\r\n", kb_key_pressed_value);
+                            uart_send_string(kb_desc);
+                            KeyboardReport->KeyCode[0] = kb_key_pressed_value;
                          }
                          kb_state = KB_RELEASED;
                          break;

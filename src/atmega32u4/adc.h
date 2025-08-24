@@ -3,9 +3,11 @@
 
 #include <avr/io.h>
 #include <util/delay.h>
-#include <stdio.h>
 
+// Инициировать АЦП
 void adc_init(void);
+
+// Прочесть значение на пине
 uint16_t adc_read(uint8_t pin);
 
 #endif

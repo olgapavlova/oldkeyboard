@@ -5,5 +5,6 @@
 #include "adc.h"
 #include "uart.h"
 #include "kb.h"
+#include "keycodes.h"
 
 #endif
